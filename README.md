@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # final_project
 
 A new Flutter project.
@@ -14,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Final_Project_Group_5
+Creating an app for sport training for anyone who wants to learn how to play a sport. Aids anyone with virtual training sessions depending on their physical conditions and measurements.
+>>>>>>> cb1412afec46f8704af33864aba7221f76d984cb
