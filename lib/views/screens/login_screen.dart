@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../screens/recipe_list_screen.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -21,7 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
         const SnackBar(content: Text('Login Successful! Welcome back.')),
       );
       // Go back to the previous screen after successful login
-      Navigator.pop(context); 
+      Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const RecipeListScreen()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
