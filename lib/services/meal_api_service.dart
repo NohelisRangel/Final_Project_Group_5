@@ -54,4 +54,43 @@ class MealApiService {
       throw Exception('Failed to load recipe details');
     }
   }
+  Future<List<Map<String, dynamic>>> searchIngredients(String query) async {
+  final uri = Uri.parse('https://api.spoonacular.com/food/ingredients/search').replace(
+    queryParameters: {
+      'apiKey': _apiKey,
+      'query': query,
+      'number': '10',
+      'metaInformation': 'true', // includes aisle, unit info
+    },
+  );
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final List results = data['results'] ?? [];
+
+    return results.map((item) => {
+      'id': item['id'],
+      'name': item['name'],
+      'country': item['aisle'] ?? 'General', // aisle used as subtitle like your mockup
+      'image': 'https://spoonacular.com/cdn/ingredients_100x100/${item['image']}',
+    }).toList();
+  } else {
+    throw Exception('Failed to search ingredients');
+  }
+}
+
+// Used when opening a recipe detail — pre-fills cart with that recipe's ingredients
+Future<List<Map<String, dynamic>>> fetchRecipeIngredients(int recipeId) async {
+  final data = await fetchRecipeDetails(recipeId); // reuses your existing method
+  final List ingredients = data['extendedIngredients'] ?? [];
+
+  return ingredients.map((item) => {
+    'id': item['id'],
+    'name': item['name'],
+    'country': item['aisle'] ?? 'General',
+    'image': 'https://spoonacular.com/cdn/ingredients_100x100/${item['image']}',
+  }).toList();
+}
 }

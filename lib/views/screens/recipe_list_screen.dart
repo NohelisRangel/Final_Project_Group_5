@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/recipe.dart';
 import '../../services/meal_api_service.dart';
 import '../widgets/recipe_card.dart';
+import 'cart_list_screen.dart';
 import 'recipe_description_screen.dart';
 
 class RecipeListScreen extends StatefulWidget {
@@ -94,6 +95,15 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         centerTitle: true,
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        actions: [
+    IconButton(
+      icon: const Icon(Icons.shopping_cart_outlined),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CartScreen()),
+      ),
+    ),
+  ],
       ),
       body: Column(
         children: [
