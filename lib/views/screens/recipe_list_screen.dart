@@ -14,9 +14,17 @@ class RecipeListScreen extends StatefulWidget {
 class _RecipeListScreenState extends State<RecipeListScreen> {
   final MealApiService _apiService = MealApiService();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   List<Recipe> _recipes = [];
+
   bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+
+  int _offset = 0;
+  final int _limit = 10;
+
   String _selectedCuisine = '';
 
   final List<String> _cuisines = [
@@ -29,36 +37,55 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     'American',
     'French',
     'Japanese',
-    'Mediterranean',
   ];
 
   @override
   void initState() {
     super.initState();
-    _loadRecipes();
+    _loadInitialRecipes();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !_isLoadingMore &&
+          !_isLoading &&
+          _hasMore) {
+        _loadMoreRecipes();
+      }
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadRecipes() async {
+  Future<void> _loadInitialRecipes() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
+      _offset = 0;
+      _hasMore = true;
+      _recipes.clear();
     });
 
     try {
       final recipes = await _apiService.fetchRecipes(
         query: _searchController.text.trim(),
         cuisine: _selectedCuisine,
+        offset: 0,
+        number: _limit,
       );
 
       if (!mounted) return;
 
       setState(() {
         _recipes = recipes;
+        _offset = recipes.length;
+        _hasMore = recipes.length == _limit;
       });
     } catch (e) {
       if (!mounted) return;
@@ -66,24 +93,61 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading recipes: $e')),
       );
-    } finally {
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _loadMoreRecipes() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final moreRecipes = await _apiService.fetchRecipes(
+        query: _searchController.text.trim(),
+        cuisine: _selectedCuisine,
+        offset: _offset,
+        number: _limit,
+      );
+
       if (!mounted) return;
 
       setState(() {
-        _isLoading = false;
+        _recipes.addAll(moreRecipes);
+        _offset += moreRecipes.length;
+        _hasMore = moreRecipes.length == _limit;
       });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading more recipes: $e')),
+      );
     }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingMore = false;
+    });
   }
 
   void _onSearch() {
-    _loadRecipes();
+    _loadInitialRecipes();
   }
 
   void _onCuisineChanged(String? value) {
     setState(() {
       _selectedCuisine = value ?? '';
     });
-    _loadRecipes();
+    _loadInitialRecipes();
   }
 
   @override
@@ -109,8 +173,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                   icon: const Icon(Icons.send),
                   onPressed: _onSearch,
                 ),
-                filled: true,
-                fillColor: Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -123,8 +185,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               initialValue: _selectedCuisine,
               decoration: InputDecoration(
                 labelText: 'Filter by country',
-                filled: true,
-                fillColor: Colors.green.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -150,8 +210,18 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         ),
                       )
                     : ListView.builder(
-                        itemCount: _recipes.length,
+                        controller: _scrollController,
+                        itemCount: _recipes.length + (_isLoadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
+                          if (index == _recipes.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
                           final recipe = _recipes[index];
 
                           return RecipeCard(
