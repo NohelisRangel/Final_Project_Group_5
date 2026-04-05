@@ -1,3 +1,4 @@
+import 'package:final_project/views/screens/favorite_folder.dart';
 import 'package:flutter/material.dart';
 import '../../models/recipe.dart';
 import '../../services/meal_api_service.dart';
@@ -96,11 +97,18 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         actions: [
-    IconButton(
+        IconButton(
       icon: const Icon(Icons.shopping_cart_outlined),
       onPressed: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const CartScreen()),
+      ),
+    ),
+        IconButton(
+      icon: const Icon(Icons.favorite_border),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => FavoriteScreen()),
       ),
     ),
   ],

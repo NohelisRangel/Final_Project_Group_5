@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'views/screens/login_screen.dart';
-
-void main() {
+import 'controllers/cart_controller.dart';  
+void main() async{
+    WidgetsFlutterBinding.ensureInitialized(); 
+  await CartManager().loadFromDatabase();    
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
