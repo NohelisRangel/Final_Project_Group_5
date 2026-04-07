@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/recipe.dart';
 import '../../services/meal_api_service.dart';
+import '../../controllers/cart_controller.dart';
+import '../../models/cart_item.dart';
+import '../screens/cart_list_screen.dart';
 
 class RecipeDescriptionScreen extends StatefulWidget {
   final Recipe recipe;
@@ -58,6 +61,34 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
         .replaceAll('&amp;', '&')
         .trim();
   }
+
+  void _addAllToCart() {
+  final ingredients = (_recipeDetails!['extendedIngredients'] as List<dynamic>? ?? []);
+  
+  for (final ingredient in ingredients) {
+    CartManager().addIngredient(CartIngredient(
+      id: ingredient['id'],
+      name: ingredient['name'] ?? '',
+      country: ingredient['aisle'] ?? 'General',
+      imageUrl: 'https://spoonacular.com/cdn/ingredients_100x100/${ingredient['image'] ?? ''}',
+    ));
+  }
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('${ingredients.length} ingredients added to cart!'),
+      backgroundColor: Colors.green,
+      action: SnackBarAction(
+        label: 'View Cart',
+        textColor: Colors.white,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CartScreen()),
+        ),
+      ),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -288,34 +319,14 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton
-                                  .icon(
-                                onPressed: () {
-                                  ScaffoldMessenger
-                                          .of(context)
-                                      .showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Added to Cart successfully'),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons
-                                    .shopping_cart_outlined),
-                                label: const Text(
-                                    'Add to Cart'),
-                                style:
-                                    ElevatedButton
-                                        .styleFrom(
-                                  backgroundColor:
-                                      Colors.green,
-                                  foregroundColor:
-                                      Colors.white,
-                                  padding:
-                                      const EdgeInsets
-                                              .symmetric(
-                                          vertical:
-                                              14),
+                              child: ElevatedButton.icon(
+                                onPressed: _recipeDetails == null ? null : _addAllToCart,
+                                icon: const Icon(Icons.shopping_cart_outlined),
+                                label: const Text('Add to Cart'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),
                             ),
