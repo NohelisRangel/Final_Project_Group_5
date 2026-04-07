@@ -32,7 +32,8 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
   Future<void> _loadRecipeDetails() async {
     try {
-      final details = await _apiService.fetchRecipeDetails(widget.recipe.id);
+      final details =
+          await _apiService.fetchRecipeDetails(widget.recipe.id);
 
       if (!mounted) return;
 
@@ -107,32 +108,39 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.network(
-                        _recipeDetails!['image'] ?? widget.recipe.image,
+                        _recipeDetails!['image'] ??
+                            widget.recipe.image,
                         height: 250,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                        errorBuilder:
+                            (context, error, stackTrace) {
                           return Container(
                             height: 250,
                             width: double.infinity,
                             color: Colors.grey.shade300,
                             child: const Center(
-                              child: Icon(Icons.broken_image, size: 60),
+                              child: Icon(Icons.broken_image,
+                                  size: 60),
                             ),
                           );
                         },
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding:
+                            const EdgeInsets.all(16),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _recipeDetails!['title'] ?? widget.recipe.title,
+                              _recipeDetails!['title'] ??
+                                  widget.recipe.title,
                               style: const TextStyle(
                                 fontSize: 26,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
@@ -140,11 +148,27 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
                             Row(
                               children: [
-                                const Icon(Icons.public, color: Colors.orange),
-                                const SizedBox(width: 8),
+                                const Icon(Icons.public,
+                                    color:
+                                        Colors.orange),
+                                const SizedBox(
+                                    width: 8),
                                 Text(
-                                  widget.recipe.cuisine,
-                                  style: const TextStyle(fontSize: 16),
+                                  (_recipeDetails![
+                                                  'cuisines'] !=
+                                              null &&
+                                          _recipeDetails![
+                                                  'cuisines']
+                                              .isNotEmpty)
+                                      ? _recipeDetails![
+                                              'cuisines'][0]
+                                          .toString()
+                                      : widget.recipe
+                                          .cuisine,
+                                  style:
+                                      const TextStyle(
+                                          fontSize:
+                                              16),
                                 ),
                               ],
                             ),
@@ -155,15 +179,20 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                               'Description',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 8),
 
                             Text(
-                              _removeHtmlTags(_recipeDetails!['summary'] ?? 'No description available'),
-                              style: const TextStyle(
+                              _removeHtmlTags(
+                                  _recipeDetails![
+                                          'summary'] ??
+                                      'No description available'),
+                              style:
+                                  const TextStyle(
                                 fontSize: 16,
                                 height: 1.5,
                               ),
@@ -175,35 +204,53 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                               'Ingredients',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 8),
 
-                            ...((_recipeDetails!['extendedIngredients'] as List<dynamic>? ?? [])
+                            ...((_recipeDetails![
+                                            'extendedIngredients']
+                                        as List<dynamic>? ??
+                                    [])
                                 .map(
-                                  (ingredient) => Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Icon(
-                                          Icons.check_circle,
-                                          size: 18,
-                                          color: Colors.green,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            ingredient['original'] ?? '',
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
+                              (ingredient) => Padding(
+                                padding:
+                                    const EdgeInsets
+                                        .symmetric(
+                                            vertical:
+                                                4),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment
+                                          .start,
+                                  children: [
+                                    const Icon(
+                                      Icons
+                                          .check_circle,
+                                      size: 18,
+                                      color:
+                                          Colors.green,
                                     ),
-                                  ),
-                                )),
+                                    const SizedBox(
+                                        width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        ingredient[
+                                                'original'] ??
+                                            '',
+                                        style:
+                                            const TextStyle(
+                                                fontSize:
+                                                    16),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )),
 
                             const SizedBox(height: 20),
 
@@ -211,7 +258,8 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                               'Instructions',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
@@ -219,10 +267,12 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
                             Text(
                               _removeHtmlTags(
-                                _recipeDetails!['instructions'] ??
+                                _recipeDetails![
+                                        'instructions'] ??
                                     'No instructions available',
                               ),
-                              style: const TextStyle(
+                              style:
+                                  const TextStyle(
                                 fontSize: 16,
                                 height: 1.5,
                               ),
@@ -232,20 +282,35 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton.icon(
+                              child: ElevatedButton
+                                  .icon(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  ScaffoldMessenger
+                                          .of(context)
+                                      .showSnackBar(
                                     const SnackBar(
-                                      content: Text('Added to Favorites successfully '),
+                                      content: Text(
+                                          'Added to Favorites successfully'),
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.favorite_border),
-                                label: const Text('Add to Favorites'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                icon: const Icon(Icons
+                                    .favorite_border),
+                                label: const Text(
+                                    'Add to Favorites'),
+                                style:
+                                    ElevatedButton
+                                        .styleFrom(
+                                  backgroundColor:
+                                      Colors
+                                          .redAccent,
+                                  foregroundColor:
+                                      Colors.white,
+                                  padding:
+                                      const EdgeInsets
+                                              .symmetric(
+                                          vertical:
+                                              14),
                                 ),
                               ),
                             ),
@@ -263,54 +328,6 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.timer, color: Colors.blue),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Cooking Timer',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    '00 : 20 : 00',
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                  SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Chip(label: Text('Start')),
-                                      Chip(label: Text('Pause')),
-                                      Chip(label: Text('Reset')),
-                                    ],
-                                  ),
-                                ],
                               ),
                             ),
                           ],

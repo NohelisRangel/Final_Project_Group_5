@@ -42,11 +42,7 @@ class RecipeCard extends StatelessWidget {
                     width: double.infinity,
                     color: Colors.grey.shade300,
                     child: const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
+                      child: Icon(Icons.broken_image, size: 50),
                     ),
                   );
                 },
@@ -64,22 +60,24 @@ class RecipeCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.public, size: 18, color: Colors.orange),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          cuisine,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade700,
+                  if (cuisine.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.public, size: 18, color: Colors.orange),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            cuisine,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

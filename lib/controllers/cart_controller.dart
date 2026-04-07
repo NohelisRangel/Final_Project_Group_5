@@ -6,7 +6,7 @@ class CartManager {
   factory CartManager() => _instance;
   CartManager._internal();
 
-  final DatabaseService _db = DatabaseService();
+  final DatabaseService _db = DatabaseService.instance;
   final List<CartIngredient> _items = [];
 
   List<CartIngredient> get items => List.unmodifiable(_items);
