@@ -296,11 +296,8 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                                 },
                                 icon: const Icon(Icons
                                     .favorite_border),
-                                label: const Text(
-                                    'Add to Favorites'),
-                                style:
-                                    ElevatedButton
-                                        .styleFrom(
+                                label: const Text('Add to Favorites'),
+                                style:ElevatedButton.styleFrom(
                                   backgroundColor:
                                       Colors
                                           .redAccent,
@@ -311,6 +308,27 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                                               .symmetric(
                                           vertical:
                                               14),
+                                ),
+                              ),
+                            ),
+                             const SizedBox(height: 12),
+
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _recipeDetails == null ? null : () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Recipe started!'),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.shopping_cart_outlined),
+                                label: const Text('Start Recipe'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orangeAccent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),
                             ),
