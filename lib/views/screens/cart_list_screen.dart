@@ -93,7 +93,18 @@ class _CartItemCard extends StatelessWidget {
               ],
             ),
           ),
- 
+
+          const SizedBox(width: 8),
+
+          // Delete button
+          IconButton(
+            onPressed: onRemove,
+            icon: Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Delete item',
+          ),
+
         ],
       ),
     );
@@ -105,7 +116,45 @@ class _CartScreenState extends State<CartScreen> {
  
   void _increment(int id) => setState(() => _cart.incrementQuantity(id));
   void _decrement(int id) => setState(() => _cart.decrementQuantity(id));
-  void _remove(int id) => setState(() => _cart.removeIngredient(id));
+
+  Future<void> _remove(int id) async {
+    final item = _cart.items.firstWhere((i) => i.id == id);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Ingredient'),
+        content: Text('Remove "${item.name}" from cart and database?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (confirmed && mounted) {
+      // Delete from database and update UI
+      await _cart.removeIngredient(id);
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${item.name} removed from cart'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
  
   @override
   Widget build(BuildContext context) {
