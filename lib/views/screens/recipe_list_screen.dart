@@ -26,7 +26,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   bool _hasMore = true;
 
   int _offset = 0;
-  final int _limit = 10;
+  final int _limit = 40;
 
   String _selectedCuisine = '';
   int _selectedIndex = 0;
