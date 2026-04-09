@@ -4,6 +4,7 @@ import '../../models/recipe.dart';
 import '../../services/meal_api_service.dart';
 import '../widgets/recipe_card.dart';
 import 'cart_list_screen.dart';
+import 'profile_screen.dart';
 import 'recipe_description_screen.dart';
 
 class RecipeListScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   final int _limit = 10;
 
   String _selectedCuisine = '';
+  int _selectedIndex = 0;
 
   final List<String> _cuisines = [
     '',
@@ -51,7 +53,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               _scrollController.position.maxScrollExtent - 200 &&
           !_isLoadingMore &&
           !_isLoading &&
-          _hasMore) {
+          _hasMore &&
+          _selectedIndex == 0) {
         _loadMoreRecipes();
       }
     });
@@ -152,112 +155,159 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     _loadInitialRecipes();
   }
 
+  Widget _buildRecipeTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+          child: TextField(
+            controller: _searchController,
+            onSubmitted: (_) => _onSearch(),
+            decoration: InputDecoration(
+              hintText: 'Search recipe by name',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: _onSearch,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: DropdownButtonFormField<String>(
+            initialValue: _selectedCuisine,
+            decoration: InputDecoration(
+              labelText: 'Filter by country',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            items: _cuisines.map((cuisine) {
+              return DropdownMenuItem<String>(
+                value: cuisine,
+                child: Text(cuisine.isEmpty ? 'All Countries' : cuisine),
+              );
+            }).toList(),
+            onChanged: _onCuisineChanged,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _recipes.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No recipes found',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _recipes.length + (_isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _recipes.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
+                        final recipe = _recipes[index];
+
+                        return RecipeCard(
+                          title: recipe.title,
+                          imageUrl: recipe.image,
+                          cuisine: recipe.cuisine,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    RecipeDescriptionScreen(recipe: recipe),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+        ),
+      ],
+    );
+  }
+
+  String _getTitle() {
+    switch (_selectedIndex) {
+      case 0:
+        return 'Recipe List';
+      case 1:
+        return 'Favorites';
+      case 2:
+        return 'Cart';
+      case 3:
+        return 'Profile';
+      default:
+        return 'Recipe List';
+    }
+  }
+
+  Widget _getBody() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildRecipeTab();
+      case 1:
+        return FavoriteScreen();
+      case 2:
+        return const CartScreen();
+      case 3:
+        return const ProfileScreen();
+      default:
+        return _buildRecipeTab();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recipe List'),
+        title: Text(_getTitle()),
         centerTitle: true,
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
-        actions: [
-        IconButton(
-      icon: const Icon(Icons.shopping_cart_outlined),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const CartScreen()),
       ),
-    ),
-        IconButton(
-      icon: const Icon(Icons.favorite_border),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => FavoriteScreen()),
-      ),
-    ),
-  ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-            child: TextField(
-              controller: _searchController,
-              onSubmitted: (_) => _onSearch(),
-              decoration: InputDecoration(
-                hintText: 'Search recipe by name',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _onSearch,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
+      body: _getBody(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.restaurant_menu),
+            label: 'Recipes',
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: DropdownButtonFormField<String>(
-              initialValue: _selectedCuisine,
-              decoration: InputDecoration(
-                labelText: 'Filter by country',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              items: _cuisines.map((cuisine) {
-                return DropdownMenuItem<String>(
-                  value: cuisine,
-                  child: Text(cuisine.isEmpty ? 'All Countries' : cuisine),
-                );
-              }).toList(),
-              onChanged: _onCuisineChanged,
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',
           ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _recipes.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No recipes found',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _recipes.length + (_isLoadingMore ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == _recipes.length) {
-                            return const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-
-                          final recipe = _recipes[index];
-
-                          return RecipeCard(
-                            title: recipe.title,
-                            imageUrl: recipe.image,
-                            cuisine: recipe.cuisine,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      RecipeDescriptionScreen(recipe: recipe),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
