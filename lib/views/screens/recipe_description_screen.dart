@@ -4,6 +4,7 @@ import '../../services/meal_api_service.dart';
 import '../../controllers/cart_controller.dart';
 import '../../models/cart_item.dart';
 import '../screens/cart_list_screen.dart';
+import '../start_cooking_page.dart';
 
 class RecipeDescriptionScreen extends StatefulWidget {
   final Recipe recipe;
@@ -32,8 +33,7 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
 
   Future<void> _loadRecipeDetails() async {
     try {
-      final details =
-          await _apiService.fetchRecipeDetails(widget.recipe.id);
+      final details = await _apiService.fetchRecipeDetails(widget.recipe.id);
 
       if (!mounted) return;
 
@@ -63,35 +63,43 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
   }
 
   void _addAllToCart() {
-  final ingredients = (_recipeDetails!['extendedIngredients'] as List<dynamic>? ?? []);
-  
-  for (final ingredient in ingredients) {
-    CartManager().addIngredient(CartIngredient(
-      id: ingredient['id'],
-      name: ingredient['name'] ?? '',
-      country: ingredient['aisle'] ?? 'General',
-      imageUrl: 'https://spoonacular.com/cdn/ingredients_100x100/${ingredient['image'] ?? ''}',
-    ));
-  }
+    final ingredients =
+        (_recipeDetails!['extendedIngredients'] as List<dynamic>? ?? []);
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('${ingredients.length} ingredients added to cart!'),
-      backgroundColor: Colors.green,
-      action: SnackBarAction(
-        label: 'View Cart',
-        textColor: Colors.white,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CartScreen()),
+    for (final ingredient in ingredients) {
+      CartManager().addIngredient(
+        CartIngredient(
+          id: ingredient['id'],
+          name: ingredient['name'] ?? '',
+          country: ingredient['aisle'] ?? 'General',
+          imageUrl:
+              'https://spoonacular.com/cdn/ingredients_100x100/${ingredient['image'] ?? ''}',
+        ),
+      );
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${ingredients.length} ingredients added to cart!'),
+        backgroundColor: Colors.green,
+        action: SnackBarAction(
+          label: 'View Cart',
+          textColor: Colors.white,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CartScreen()),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final cuisines = _recipeDetails!['cuisines'] as List<dynamic>? ?? [];
+    final ingredients =
+        _recipeDetails!['extendedIngredients'] as List<dynamic>? ?? [];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipe Detail'),
@@ -108,243 +116,176 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.network(
-                        _recipeDetails!['image'] ??
-                            widget.recipe.image,
+                        _recipeDetails!['image'] ?? widget.recipe.image,
                         height: 250,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder:
-                            (context, error, stackTrace) {
+                        errorBuilder: (context, error, stackTrace) {
                           return Container(
                             height: 250,
                             width: double.infinity,
                             color: Colors.grey.shade300,
                             child: const Center(
-                              child: Icon(Icons.broken_image,
-                                  size: 60),
+                              child: Icon(Icons.broken_image, size: 60),
                             ),
                           );
                         },
                       ),
-
                       Padding(
-                        padding:
-                            const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _recipeDetails!['title'] ??
-                                  widget.recipe.title,
+                              _recipeDetails!['title'] ?? widget.recipe.title,
                               style: const TextStyle(
                                 fontSize: 26,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 10),
-
                             Row(
                               children: [
-                                const Icon(Icons.public,
-                                    color:
-                                        Colors.orange),
-                                const SizedBox(
-                                    width: 8),
+                                const Icon(Icons.public, color: Colors.orange),
+                                const SizedBox(width: 8),
                                 Text(
-                                  (_recipeDetails![
-                                                  'cuisines'] !=
-                                              null &&
-                                          _recipeDetails![
-                                                  'cuisines']
-                                              .isNotEmpty)
-                                      ? _recipeDetails![
-                                              'cuisines'][0]
-                                          .toString()
-                                      : widget.recipe
-                                          .cuisine,
-                                  style:
-                                      const TextStyle(
-                                          fontSize:
-                                              16),
+                                  cuisines.isNotEmpty
+                                      ? cuisines[0].toString()
+                                      : widget.recipe.cuisine,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 20),
-
                             const Text(
                               'Description',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
                             Text(
                               _removeHtmlTags(
-                                  _recipeDetails![
-                                          'summary'] ??
-                                      'No description available'),
-                              style:
-                                  const TextStyle(
+                                _recipeDetails!['summary'] ??
+                                    'No description available',
+                              ),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 height: 1.5,
                               ),
                             ),
-
                             const SizedBox(height: 20),
-
                             const Text(
                               'Ingredients',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
-                            ...((_recipeDetails![
-                                            'extendedIngredients']
-                                        as List<dynamic>? ??
-                                    [])
-                                .map(
+                            ...ingredients.map(
                               (ingredient) => Padding(
                                 padding:
-                                    const EdgeInsets
-                                        .symmetric(
-                                            vertical:
-                                                4),
+                                    const EdgeInsets.symmetric(vertical: 4),
                                 child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
-                                      Icons
-                                          .check_circle,
+                                      Icons.check_circle,
                                       size: 18,
-                                      color:
-                                          Colors.green,
+                                      color: Colors.green,
                                     ),
-                                    const SizedBox(
-                                        width: 8),
+                                    const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        ingredient[
-                                                'original'] ??
-                                            '',
-                                        style:
-                                            const TextStyle(
-                                                fontSize:
-                                                    16),
+                                        ingredient['original'] ?? '',
+                                        style: const TextStyle(fontSize: 16),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            )),
-
+                            ),
                             const SizedBox(height: 20),
-
                             const Text(
                               'Instructions',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
                             Text(
                               _removeHtmlTags(
-                                _recipeDetails![
-                                        'instructions'] ??
+                                _recipeDetails!['instructions'] ??
                                     'No instructions available',
                               ),
-                              style:
-                                  const TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 height: 1.5,
                               ),
                             ),
-
                             const SizedBox(height: 24),
-
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton
-                                  .icon(
-                                onPressed: () {
-                                  ScaffoldMessenger
-                                          .of(context)
-                                      .showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Added to Favorites successfully'),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons
-                                    .favorite_border),
-                                label: const Text('Add to Favorites'),
-                                style:ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Colors
-                                          .redAccent,
-                                  foregroundColor:
-                                      Colors.white,
-                                  padding:
-                                      const EdgeInsets
-                                              .symmetric(
-                                          vertical:
-                                              14),
-                                ),
-                              ),
-                            ),
-                             const SizedBox(height: 12),
-
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: _recipeDetails == null ? null : () {
+                                onPressed: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Recipe started!'),
+                                      content: Text(
+                                        'Added to Favorites successfully',
+                                      ),
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.shopping_cart_outlined),
-                                label: const Text('Start Recipe'),
+                                icon: const Icon(Icons.favorite_border),
+                                label: const Text('Add to Favorites'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.redAccent,
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => StartCookingPage(
+                                        recipe: widget.recipe,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.timer),
+                                label: const Text('Start Cooking'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.orangeAccent,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 12),
-
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: _recipeDetails == null ? null : _addAllToCart,
-                                icon: const Icon(Icons.shopping_cart_outlined),
+                                onPressed: _addAllToCart,
+                                icon:
+                                    const Icon(Icons.shopping_cart_outlined),
                                 label: const Text('Add to Cart'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),
                             ),

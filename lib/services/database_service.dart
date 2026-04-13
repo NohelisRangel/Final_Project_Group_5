@@ -20,11 +20,7 @@ class DatabaseService {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'global_recipe_book.db');
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -48,7 +44,7 @@ class DatabaseService {
         quantity INTEGER NOT NULL DEFAULT 1
       )
     ''');
-    
+
     await db.execute('''
       CREATE TABLE favorites (
         id INTEGER PRIMARY KEY,
@@ -84,37 +80,46 @@ class DatabaseService {
         FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE cooked_recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipe_id INTEGER,
+        name TEXT,
+        elapsed_seconds INTEGER,
+        cooked_at TEXT
+      )
+    ''');
   }
 
   // Load all items from DB
   Future<List<CartIngredient>> loadCart() async {
     final db = await database;
     final rows = await db.query('cart_items');
-    return rows.map((row) => CartIngredient(
-      id: row['id'] as int,
-      name: row['name'] as String,
-      country: row['country'] as String,
-      imageUrl: row['imageUrl'] as String,
-      quantity: row['quantity'] as int,
-    )).toList();
+    return rows
+        .map(
+          (row) => CartIngredient(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            country: row['country'] as String,
+            imageUrl: row['imageUrl'] as String,
+            quantity: row['quantity'] as int,
+          ),
+        )
+        .toList();
   }
 
   // Insert or update item
   Future<void> upsertItem(CartIngredient item) async {
     final db = await database;
-    await db.insert(
-      'cart_items',
-      {
-        'id': item.id,
-        'name': item.name,
-        'country': item.country,
-        'imageUrl': item.imageUrl,
-        'quantity': item.quantity,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('cart_items', {
+      'id': item.id,
+      'name': item.name,
+      'country': item.country,
+      'imageUrl': item.imageUrl,
+      'quantity': item.quantity,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-
 
   // Delete one item
   Future<void> deleteItem(int id) async {
@@ -127,5 +132,4 @@ class DatabaseService {
     final db = await database;
     await db.delete('cart_items');
   }
-
 }

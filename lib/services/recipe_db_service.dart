@@ -58,4 +58,24 @@ class RecipeDbService {
 
     await db.delete('recipes');
   }
+
+  /// Save cooked recipe with time
+    Future<void> saveCookedRecipe({
+    required int recipeId,
+    required String title,
+    required int elapsedSeconds,
+  }) async {
+    final db = await _databaseService.database;
+
+    await db.insert(
+      'cooked_recipes',
+      {
+        'recipe_id': recipeId,
+        'name': title,
+        'elapsed_seconds': elapsedSeconds,
+        'cooked_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 }
