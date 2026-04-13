@@ -51,8 +51,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
-          !_isLoadingMore &&
           !_isLoading &&
+          !_isLoadingMore &&
           _hasMore &&
           _selectedIndex == 0) {
         _loadMoreRecipes();
@@ -78,23 +78,25 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     });
 
     try {
-      final recipes = await _apiService.fetchRecipes(
+      final result = await _apiService.fetchRecipes(
         query: _searchController.text.trim(),
         cuisine: _selectedCuisine,
         offset: 0,
         number: _limit,
       );
 
+      final List<Recipe> recipes = result['recipes'];
+      final bool hasMore = result['hasMore'];
+
       if (!mounted) return;
 
       setState(() {
         _recipes = recipes;
-        _offset = recipes.length;
-        _hasMore = recipes.length == _limit;
+        _offset = _limit; // move by API batch size, not filtered count
+        _hasMore = hasMore;
       });
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading recipes: $e')),
       );
@@ -115,23 +117,25 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     });
 
     try {
-      final moreRecipes = await _apiService.fetchRecipes(
+      final result = await _apiService.fetchRecipes(
         query: _searchController.text.trim(),
         cuisine: _selectedCuisine,
         offset: _offset,
         number: _limit,
       );
 
+      final List<Recipe> moreRecipes = result['recipes'];
+      final bool hasMore = result['hasMore'];
+
       if (!mounted) return;
 
       setState(() {
         _recipes.addAll(moreRecipes);
-        _offset += moreRecipes.length;
-        _hasMore = moreRecipes.length == _limit;
+        _offset += _limit; // important
+        _hasMore = hasMore;
       });
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading more recipes: $e')),
       );
@@ -179,7 +183,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: DropdownButtonFormField<String>(
-            initialValue: _selectedCuisine,
+            value: _selectedCuisine,
             decoration: InputDecoration(
               labelText: 'Filter by country',
               border: OutlineInputBorder(
