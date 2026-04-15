@@ -68,92 +68,98 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Future<void> _loadInitialRecipes() async {
-    if (!mounted) return;
+  if (!mounted) return;
 
-    setState(() {
-      _isLoading = true;
-      _offset = 0;
-      _hasMore = true;
-      _recipes.clear();
-    });
+  setState(() {
+    _isLoading = true;
+    _offset = 0;
+    _hasMore = true;
+    _recipes.clear();
+  });
 
-    try {
-      final recipes = await _apiService.fetchRecipes(
-        query: _searchController.text.trim(),
-        cuisine: _selectedCuisine,
-        offset: 0,
-        number: _limit,
-      );
+  try {
+    final result = await _apiService.fetchRecipes(
+      query: _searchController.text.trim(),
+      cuisine: _selectedCuisine,
+      offset: 0,
+      number: _limit,
+    );
 
-      if (!mounted) return;
-
-      setState(() {
-        _recipes = recipes;
-        _offset = recipes.length;
-        _hasMore = recipes.length == _limit;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading recipes: $e')),
-      );
-    }
+    final List<Recipe> recipes = result['recipes'];
+    final bool hasMore = result['hasMore'];
 
     if (!mounted) return;
 
     setState(() {
-      _isLoading = false;
+      _recipes = recipes;
+      _offset = _limit;
+      _hasMore = hasMore;
     });
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error loading recipes: $e')),
+    );
   }
 
-  Future<void> _loadMoreRecipes() async {
+  if (!mounted) return;
+
+  setState(() {
+    _isLoading = false;
+  });
+}
+
+Future<void> _loadMoreRecipes() async {
+  if (!mounted) return;
+
+  setState(() {
+    _isLoadingMore = true;
+  });
+
+  try {
+    final result = await _apiService.fetchRecipes(
+      query: _searchController.text.trim(),
+      cuisine: _selectedCuisine,
+      offset: _offset,
+      number: _limit,
+    );
+
+    final List<Recipe> moreRecipes = result['recipes'];
+    final bool hasMore = result['hasMore'];
+
     if (!mounted) return;
 
     setState(() {
-      _isLoadingMore = true;
+      _recipes.addAll(moreRecipes);
+      _offset += _limit;
+      _hasMore = hasMore;
     });
-
-    try {
-      final moreRecipes = await _apiService.fetchRecipes(
-        query: _searchController.text.trim(),
-        cuisine: _selectedCuisine,
-        offset: _offset,
-        number: _limit,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _recipes.addAll(moreRecipes);
-        _offset += moreRecipes.length;
-        _hasMore = moreRecipes.length == _limit;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading more recipes: $e')),
-      );
-    }
-
+  } catch (e) {
     if (!mounted) return;
 
-    setState(() {
-      _isLoadingMore = false;
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error loading more recipes: $e')),
+    );
   }
 
-  void _onSearch() {
-    _loadInitialRecipes();
-  }
+  if (!mounted) return;
 
-  void _onCuisineChanged(String? value) {
-    setState(() {
-      _selectedCuisine = value ?? '';
-    });
-    _loadInitialRecipes();
-  }
+  setState(() {
+    _isLoadingMore = false;
+  });
+}
+
+void _onSearch() {
+  _loadInitialRecipes();
+}
+
+void _onCuisineChanged(String? value) {
+  setState(() {
+    _selectedCuisine = value ?? '';
+  });
+  _loadInitialRecipes();
+}
 
   Widget _buildRecipeTab() {
     return Column(

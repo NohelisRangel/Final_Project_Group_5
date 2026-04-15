@@ -9,50 +9,59 @@ class MealApiService {
 
   final RecipeDbService _recipeDbService = RecipeDbService();
 
-  Future<List<Recipe>> fetchRecipes({
-    String query = '',
-    String cuisine = '',
-    int offset = 0,
-    int number = 10,
-  }) async {
-    final uri = Uri.parse('$_baseUrl/complexSearch').replace(
-      queryParameters: {
-        'apiKey': _apiKey,
-        'number': number.toString(),
-        'offset': offset.toString(),
-        'addRecipeInformation': 'true',
-        if (query.isNotEmpty) 'query': query,
-        if (cuisine.isNotEmpty) 'cuisine': cuisine,
-      },
-    );
+  
+Future<Map<String, dynamic>> fetchRecipes({
+  String query = '',
+  String cuisine = '',
+  int offset = 0,
+  int number = 40,
+}) async {
+  final uri = Uri.parse('$_baseUrl/complexSearch').replace(
+    queryParameters: {
+      'apiKey': _apiKey,
+      'number': number.toString(),
+      'offset': offset.toString(),
+      'addRecipeInformation': 'true',
+      if (query.isNotEmpty) 'query': query,
+      if (cuisine.isNotEmpty) 'cuisine': cuisine,
+    },
+  );
 
-    final response = await http.get(uri);
+  final response = await http.get(uri);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
 
-      if (data['results'] == null) {
-        return [];
-      }
+    if (data['results'] == null) {
+      return {
+        'recipes': <Recipe>[],
+        'hasMore': false,
+      };
+    }
 
-      final List results = data['results'];
+    final List results = data['results'];
 
-      final List<Recipe> recipes = results
-          .map((item) => Recipe.fromJson(item))
-          .where((recipe) => recipe.cuisine.isNotEmpty)
-          .toList();
+    final List<Recipe> recipes = results
+        .map((item) => Recipe.fromJson(item))
+        .where((recipe) => recipe.cuisine.isNotEmpty)
+        .toList();
 
+    if (offset == 0) {
       final List<Recipe> firstTen = recipes.take(10).toList();
       await _recipeDbService.clearRecipes();
       await _recipeDbService.insertRecipes(firstTen);
-
-      return recipes;
-    } else {
-      throw Exception(
-        'Failed to load recipes. Status: ${response.statusCode}. Body: ${response.body}',
-      );
     }
+
+    return {
+      'recipes': recipes,
+      'hasMore': results.length == number,
+    };
+  } else {
+    throw Exception(
+      'Failed to load recipes. Status: ${response.statusCode}. Body: ${response.body}',
+    );
   }
+}
 
   Future<Map<String, dynamic>> fetchRecipeDetails(int recipeId) async {
     final uri = Uri.parse('$_baseUrl/$recipeId/information').replace(

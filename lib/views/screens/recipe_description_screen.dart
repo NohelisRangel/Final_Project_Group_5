@@ -5,7 +5,7 @@ import '../../controllers/cart_controller.dart';
 import '../../models/cart_item.dart';
 import '../screens/cart_list_screen.dart';
 import 'start_cooking_page.dart';
-
+import '../../controllers/favorites_controller.dart';
 class RecipeDescriptionScreen extends StatefulWidget {
   final Recipe recipe;
 
@@ -230,7 +230,15 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: () {
+                                onPressed: () async {
+                                  await FavoriteController.addFavorite({
+                                    "id": _recipeDetails!['id'],
+                                    "title": _recipeDetails!['title'] ?? widget.recipe.title,
+                                    "image": _recipeDetails!['image'] ?? widget.recipe.image,
+                                  });
+
+                                  if (!mounted) return;
+
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
