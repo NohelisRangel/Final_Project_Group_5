@@ -4,7 +4,7 @@ import '../../services/meal_api_service.dart';
 import '../../controllers/cart_controller.dart';
 import '../../models/cart_item.dart';
 import '../screens/cart_list_screen.dart';
-import '../start_cooking_page.dart';
+import 'start_cooking_page.dart';
 
 class RecipeDescriptionScreen extends StatefulWidget {
   final Recipe recipe;
@@ -255,13 +255,23 @@ class _RecipeDescriptionScreenState extends State<RecipeDescriptionScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: () {
                                   Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => StartCookingPage(
-                                        recipe: widget.recipe,
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => StartCookingPage(
+                                          recipe: Recipe(
+                                            id: _recipeDetails!['id'],
+                                            title: _recipeDetails!['title'] ?? widget.recipe.title,
+                                            image: _recipeDetails!['image'] ?? widget.recipe.image,
+                                            cuisine: widget.recipe.cuisine,
+                                            description: _removeHtmlTags(_recipeDetails!['summary'] ?? ''),
+                                            ingredients: widget.recipe.ingredients,
+                                            instructions: _removeHtmlTags( // ← pass cleaned instructions
+                                              _recipeDetails!['instructions'] ?? 'No instructions available',
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
                                 },
                                 icon: const Icon(Icons.timer),
                                 label: const Text('Start Cooking'),

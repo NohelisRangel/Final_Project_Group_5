@@ -5,6 +5,7 @@ class Recipe {
   final String cuisine;
   final String description;
   final String ingredients;
+  final String instructions;
 
   Recipe({
     required this.id,
@@ -13,6 +14,7 @@ class Recipe {
     required this.cuisine,
     required this.description,
     required this.ingredients,
+    this.instructions = '',
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {

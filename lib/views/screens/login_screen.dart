@@ -19,7 +19,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-
+  
+      if (email.isEmpty || password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter both email and password'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
     // Verify through the controller
     final user = await _profileController.loginUser(email, password);
 
@@ -61,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Icon(Icons.restaurant_menu, size: 80, color: Colors.orange.shade400),
               const SizedBox(height: 20),
-              const Text('Welcome Back!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text('Welcome!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               const Text('Log in to access your saved recipes', style: TextStyle(color: Colors.grey)),
               const SizedBox(height: 40),

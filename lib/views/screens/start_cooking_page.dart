@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'package:final_project/services/database_service.dart';
 import 'package:flutter/material.dart';
-import '../models/recipe.dart';
-import '../services/recipe_db_service.dart';
+import '../../models/recipe.dart';
+import '../../services/recipe_db_service.dart';
 
 class StartCookingPage extends StatefulWidget {
   final Recipe recipe;
@@ -69,8 +70,10 @@ class _StartCookingPageState extends State<StartCookingPage> {
     try {
       await RecipeDbService().saveCookedRecipe(
         recipeId: widget.recipe.id,
+        userId: DatabaseService.instance.currentUserId.toString(),
         title: widget.recipe.title,
         elapsedSeconds: _elapsedSeconds,
+        instructions: widget.recipe.instructions,
       );
 
       if (!mounted) return;

@@ -4,7 +4,7 @@ import '../models/recipe.dart';
 import 'recipe_db_service.dart';
 
 class MealApiService {
-  static const String _apiKey = '177cf41477964663beec972d7a986bf1';
+  static const String _apiKey = 'e17739033843449b98371c09ca759ea2';
   static const String _baseUrl = 'https://api.spoonacular.com/recipes';
 
   final RecipeDbService _recipeDbService = RecipeDbService();

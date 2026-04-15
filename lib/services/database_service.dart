@@ -84,11 +84,12 @@ class DatabaseService {
         id                INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id           INTEGER NOT NULL,
         recipe_id         INTEGER NOT NULL,
+        title             TEXT    NOT NULL,
         completed_at      TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
         time_taken        INTEGER NOT NULL DEFAULT 0,
+        instructions TEXT,
         FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
-        FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE
-      )
+        FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE      )
     ''');
 
     // SEED DATA 
@@ -97,7 +98,6 @@ class DatabaseService {
     await db.insert('users', {'email': 'test@user3.com', 'password': 'password321'});
   }
 
-  // --- NEW AUTHENTICATION METHODS ---
   Future<Map<String, dynamic>?> authenticateUser(String email, String password) async {
     final db = await database;
     final result = await db.query(

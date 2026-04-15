@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../controllers/profile_controller.dart';
+import '../../main.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,6 +19,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadProfileData();
   }
+  
+  
 
   Future<void> _loadProfileData() async {
     final history = await _profileController.getHistory();
@@ -47,7 +50,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          
+          Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: isDarkMode,
+                      builder: (context, value, child) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.light_mode),
+                            Switch(
+                              value: value,
+                              onChanged: (val) {
+                                isDarkMode.value = val;
+                              },
+                            ),
+                            const Icon(Icons.dark_mode),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
           // User Profile Header
           Container(
             color: Colors.orange.shade50,

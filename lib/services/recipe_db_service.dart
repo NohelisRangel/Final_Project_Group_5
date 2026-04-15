@@ -62,18 +62,22 @@ class RecipeDbService {
   /// Save cooked recipe with time
     Future<void> saveCookedRecipe({
     required int recipeId,
+    required String userId,
     required String title,
     required int elapsedSeconds,
+    required String instructions,
   }) async {
     final db = await _databaseService.database;
 
     await db.insert(
-      'cooked_recipes',
+      'recipe_completed',
       {
         'recipe_id': recipeId,
-        'name': title,
-        'elapsed_seconds': elapsedSeconds,
-        'cooked_at': DateTime.now().toIso8601String(),
+        'user_id': DatabaseService.instance.currentUserId ?? 0,
+        'title': title,
+        'time_taken': elapsedSeconds,
+        'completed_at': DateTime.now().toIso8601String(),
+        'instructions': instructions,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
