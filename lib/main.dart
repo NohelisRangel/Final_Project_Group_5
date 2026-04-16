@@ -1,3 +1,4 @@
+import 'package:final_project/views/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'controllers/cart_controller.dart';
 import 'views/screens/login_screen.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xFF2C2C2C), // dark gray
           ),
           themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-          home: const LoginScreen(),
+          home: const SplashScreen(),
         );
       },
     );
